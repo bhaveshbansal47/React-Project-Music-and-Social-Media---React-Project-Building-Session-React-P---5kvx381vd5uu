@@ -6,6 +6,7 @@ export function MusicPlayer({ currentMusic }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [totalTime, setTotalTime] = useState(0);
+    const [volume, setVolume] = useState(1);
     const currentTimeInterval = useRef();
     const audioRef = useRef();
     const getTimeInString = (time) => {
@@ -31,7 +32,7 @@ export function MusicPlayer({ currentMusic }) {
             if (prev === totalTime) {
                 setIsPlaying(false);
                 clearInterval(currentTimeInterval.current);
-                setCurrentTime(0)
+                setCurrentTime(0);
             }
             return Math.ceil(audioRef.current.currentTime);
         });
@@ -50,6 +51,7 @@ export function MusicPlayer({ currentMusic }) {
             setIsPlaying(false);
             updateTotalTime();
             setCurrentTime(0);
+            setVolume(audioRef.current.volume * 100)
         }
         return () => {
             clearInterval(currentTimeInterval.current);
@@ -70,6 +72,29 @@ export function MusicPlayer({ currentMusic }) {
                 <h3>{getTimeInString(currentTime)}</h3>
                 <h3>{getTimeInString(totalTime)}</h3>
             </div>
+            <input
+                onChange={(e) => {
+                    setCurrentTime(e.target.value);
+                    audioRef.current.currentTime = e.target.value;
+                }}
+                type="range"
+                value={currentTime}
+                style={styles.slider}
+                min={0}
+                max={totalTime}
+            />
+
+            <input
+                onChange={(e) => {
+                    setVolume(e.target.value);
+                    audioRef.current.volume = e.target.value/100;
+                }}
+                type="range"
+                value={volume}
+                style={styles.slider}
+                min={0}
+                max={100}
+            />
             <audio ref={audioRef} src={currentMusic.audio_url} />
         </div>
     );
@@ -122,5 +147,10 @@ const styles = {
         color: "white",
         padding: 20,
         gap: 10,
+    },
+    slider: {
+        width: 200,
+        height: 50,
+        marginRight: 100
     },
 };
