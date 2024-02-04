@@ -1,21 +1,31 @@
-import { likePost } from "@/apis/posts";
+import { fetchComments, likePost } from "@/apis/posts";
 import { TokenContext } from "@/app/layout";
-import { useContext } from "react";
+import { useContext, useState } from "react";
+import { Comment } from "./comment";
 
 export function Post({ post, setShowModal }) {
-    const {token} = useContext(TokenContext)
-    const onLike = async () => {
-        if(!token) {
-            setShowModal(true)
-        } else {
-            likePost(post._id)
-        }
+  const { token } = useContext(TokenContext);
+  const [likes, setLikes] = useState(post.likeCount);
+  const [comments, setComments] = useState([]);
+  const onLike = async () => {
+    if (!token) {
+      setShowModal(true);
+    } else {
+      try {
+        await likePost(post._id);
+        setLikes((likes) => likes + 1);
+      } catch (err) {
+        alert(err.response.data.message);
+      }
     }
-    const onComment = async () => {
-        if(!token) {
-            setShowModal(true)
-        }
+  };
+  const onComment = async () => {
+    if (!token) {
+      setShowModal(true);
+    } else {
+      setComments(await fetchComments(post._id));
     }
+  };
   return (
     <div
       style={{
@@ -88,7 +98,7 @@ export function Post({ post, setShowModal }) {
           onClick={onLike}
         >
           {" "}
-          Likes:{post.likeCount}{" "}
+          Likes:{likes}{" "}
         </h4>{" "}
         <h4
           style={{
@@ -99,6 +109,14 @@ export function Post({ post, setShowModal }) {
           Comments:{post.commentCount}
         </h4>
       </div>
+      {comments.length > 0 && (
+        <div>
+          <h3>Comments:</h3>
+          {comments.map((comment) => (
+            <Comment key={comment._id} comment={comment} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

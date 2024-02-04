@@ -20,3 +20,16 @@ export async function likePost(postId) {
   );
   console.log(res.data);
 }
+
+export async function fetchComments(postId) {
+  const token = localStorage.getItem("token");
+  const res = await axios.get(
+    `https://academics.newtonschool.co/api/v1/quora/post/${postId}/comments`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return res.data.data;
+}
